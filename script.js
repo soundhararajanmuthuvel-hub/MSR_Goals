@@ -4,6 +4,10 @@ function saveGoals() {
   localStorage.setItem("goals", JSON.stringify(goals));
 }
 
+function formatMoney(amount) {
+  return amount.toLocaleString("en-IN");
+}
+
 function getGoalIcon(name) {
 
   name = name.toLowerCase();
@@ -108,15 +112,18 @@ function displayGoals() {
 
               <p>
 
-                Target: ₹${goal.target}
+                Target:
+                ₹${formatMoney(goal.target)}
 
                 •
 
-                Saved: ₹${goal.saved}
+                Saved:
+                ₹${formatMoney(goal.saved)}
 
                 •
 
-                Remaining: ₹${goal.target - goal.saved}
+                Remaining:
+                ₹${formatMoney(goal.target - goal.saved)}
 
               </p>
 
@@ -184,7 +191,7 @@ function displayGoals() {
       font-weight:bold;
       margin-bottom:20px;
     ">
-      ₹${totalSaved}
+      ₹${formatMoney(totalSaved)}
     </div>
 
     <div style="
@@ -199,7 +206,7 @@ function displayGoals() {
       font-size:40px;
       font-weight:bold;
     ">
-      ₹${balance}
+      ₹${formatMoney(balance)}
     </div>
 
   `;
