@@ -1,38 +1,38 @@
 let goals = JSON.parse(localStorage.getItem("goals")) || [];
 
-function saveGoals(){
+function saveGoals() {
   localStorage.setItem("goals", JSON.stringify(goals));
 }
 
-function getGoalIcon(name){
+function getGoalIcon(name) {
 
   name = name.toLowerCase();
 
-  if(name.includes("bike")) return "🏍️";
-  if(name.includes("car")) return "🚗";
-  if(name.includes("trip")) return "✈️";
-  if(name.includes("study")) return "🎓";
-  if(name.includes("phone")) return "📱";
-  if(name.includes("laptop")) return "💻";
+  if (name.includes("bike")) return "🏍️";
+  if (name.includes("car")) return "🚗";
+  if (name.includes("trip")) return "✈️";
+  if (name.includes("study")) return "🎓";
+  if (name.includes("phone")) return "📱";
+  if (name.includes("laptop")) return "💻";
 
   return "🎯";
 }
 
-function addGoal(){
+function addGoal() {
 
   const name = document.getElementById("goalName").value;
 
   const amount = document.getElementById("goalAmount").value;
 
-  if(name === "" || amount === ""){
+  if (name === "" || amount === "") {
     alert("Please enter all fields");
     return;
   }
 
   goals.push({
-    name:name,
-    target:Number(amount),
-    saved:0
+    name: name,
+    target: Number(amount),
+    saved: 0
   });
 
   saveGoals();
@@ -44,15 +44,15 @@ function addGoal(){
   document.getElementById("goalAmount").value = "";
 }
 
-function updateMoney(index,value){
+function updateMoney(index, value) {
 
   goals[index].saved += value;
 
-  if(goals[index].saved < 0){
+  if (goals[index].saved < 0) {
     goals[index].saved = 0;
   }
 
-  if(goals[index].saved > goals[index].target){
+  if (goals[index].saved > goals[index].target) {
     goals[index].saved = goals[index].target;
   }
 
@@ -61,16 +61,16 @@ function updateMoney(index,value){
   displayGoals();
 }
 
-function deleteGoal(index){
+function deleteGoal(index) {
 
-  goals.splice(index,1);
+  goals.splice(index, 1);
 
   saveGoals();
 
   displayGoals();
 }
 
-function displayGoals(){
+function displayGoals() {
 
   const goalList = document.getElementById("goalList");
 
@@ -80,7 +80,7 @@ function displayGoals(){
 
   let totalGoal = 0;
 
-  goals.forEach((goal,index)=>{
+  goals.forEach((goal, index) => {
 
     totalSaved += goal.saved;
 
@@ -172,14 +172,15 @@ function displayGoals(){
   document.getElementById("totalSaved").innerHTML = `
 
     <div style="
-      font-size:24px;
-      margin-bottom:15px;
+      font-size:18px;
+      opacity:0.9;
+      margin-bottom:8px;
     ">
-      Saved
+      Saved Amount
     </div>
 
     <div style="
-      font-size:40px;
+      font-size:30px;
       font-weight:bold;
       margin-bottom:20px;
     ">
@@ -187,17 +188,18 @@ function displayGoals(){
     </div>
 
     <div style="
-      font-size:70px;
-      font-weight:bold;
+      font-size:18px;
+      opacity:0.9;
+      margin-bottom:8px;
     ">
-      ₹${balance}
+      Balance Amount
     </div>
 
     <div style="
-      font-size:28px;
-      margin-top:10px;
+      font-size:40px;
+      font-weight:bold;
     ">
-      Balance
+      ₹${balance}
     </div>
 
   `;
@@ -205,9 +207,9 @@ function displayGoals(){
 
 displayGoals();
 
-if("serviceWorker" in navigator){
+if ("serviceWorker" in navigator) {
 
-  window.addEventListener("load",()=>{
+  window.addEventListener("load", () => {
 
     navigator.serviceWorker.register("sw.js");
 
