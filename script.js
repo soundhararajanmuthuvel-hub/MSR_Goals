@@ -1,13 +1,22 @@
-let goals = JSON.parse(localStorage.getItem("goals")) || [];
+let goals =
+  JSON.parse(
+    localStorage.getItem("goals")
+  ) || [];
 
 let commonSavings =
-  Number(localStorage.getItem("commonSavings")) || 0;
+  Number(
+    localStorage.getItem(
+      "commonSavings"
+    )
+  ) || 0;
 
 function saveGoals() {
+
   localStorage.setItem(
     "goals",
     JSON.stringify(goals)
   );
+
 }
 
 function formatMoney(amount) {
@@ -21,13 +30,19 @@ function getGoalIcon(name) {
 
   name = name.toLowerCase();
 
-  if (name.includes("bike")) return "🏍️";
-  if (name.includes("car")) return "🚗";
-  if (name.includes("trip")) return "✈️";
-  if (name.includes("study")) return "🎓";
-  if (name.includes("phone")) return "📱";
-  if (name.includes("laptop")) return "💻";
-  if (name.includes("house")) return "🏠";
+  if(name.includes("bike")) return "🏍️";
+
+  if(name.includes("car")) return "🚗";
+
+  if(name.includes("trip")) return "✈️";
+
+  if(name.includes("study")) return "🎓";
+
+  if(name.includes("phone")) return "📱";
+
+  if(name.includes("laptop")) return "💻";
+
+  if(name.includes("house")) return "🏠";
 
   return "🎯";
 }
@@ -37,9 +52,17 @@ function saveCommonSavings() {
   const amount =
     document.getElementById(
       "commonSavings"
-    ).value;
+    ).value.trim();
 
-  commonSavings = Number(amount);
+  if(amount === ""){
+
+    commonSavings = 0;
+
+  }else{
+
+    commonSavings = Number(amount);
+
+  }
 
   localStorage.setItem(
     "commonSavings",
@@ -61,20 +84,22 @@ function addGoal() {
       "goalAmount"
     ).value;
 
-  if (name === "" || amount === "") {
+  if(name === "" || amount === ""){
 
-    alert("Please enter all fields");
+    alert(
+      "Please enter all fields"
+    );
 
     return;
   }
 
   goals.push({
 
-    name: name,
+    name:name,
 
-    target: Number(amount),
+    target:Number(amount),
 
-    saved: 0
+    saved:0
 
   });
 
@@ -91,19 +116,19 @@ function addGoal() {
   ).value = "";
 }
 
-function updateMoney(index, value) {
+function updateMoney(index,value){
 
   goals[index].saved += value;
 
-  if (goals[index].saved < 0) {
+  if(goals[index].saved < 0){
 
     goals[index].saved = 0;
   }
 
-  if (
+  if(
     goals[index].saved >
     goals[index].target
-  ) {
+  ){
 
     goals[index].saved =
       goals[index].target;
@@ -114,16 +139,16 @@ function updateMoney(index, value) {
   displayGoals();
 }
 
-function deleteGoal(index) {
+function deleteGoal(index){
 
-  goals.splice(index, 1);
+  goals.splice(index,1);
 
   saveGoals();
 
   displayGoals();
 }
 
-function displayGoals() {
+function displayGoals(){
 
   const goalList =
     document.getElementById(
@@ -134,12 +159,14 @@ function displayGoals() {
 
   let totalSaved = 0;
 
-  goals.forEach((goal, index) => {
+  goals.forEach((goal,index)=>{
 
     totalSaved += goal.saved;
 
     const percent = Math.floor(
+
       (goal.saved / goal.target) * 100
+
     );
 
     goalList.innerHTML += `
@@ -151,7 +178,9 @@ function displayGoals() {
           <div class="goal-left">
 
             <div class="goal-icon">
+
               ${getGoalIcon(goal.name)}
+
             </div>
 
             <div class="goal-info">
@@ -231,7 +260,8 @@ function displayGoals() {
 
   document.getElementById(
     "commonSavings"
-  ).value = commonSavings;
+  ).value =
+    commonSavings || "";
 
   document.getElementById(
     "totalSaved"
@@ -283,11 +313,11 @@ function displayGoals() {
 
 displayGoals();
 
-if ("serviceWorker" in navigator) {
+if("serviceWorker" in navigator){
 
   window.addEventListener(
     "load",
-    () => {
+    ()=>{
 
       navigator.serviceWorker
         .register("sw.js");
