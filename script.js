@@ -10,7 +10,7 @@ let commonSavings =
     )
   ) || 0;
 
-function saveGoals() {
+function saveGoals(){
 
   localStorage.setItem(
     "goals",
@@ -19,14 +19,14 @@ function saveGoals() {
 
 }
 
-function formatMoney(amount) {
+function formatMoney(amount){
 
   return Number(amount)
     .toLocaleString("en-IN");
 
 }
 
-function getGoalIcon(name) {
+function getGoalIcon(name){
 
   name = name.toLowerCase();
 
@@ -47,7 +47,7 @@ function getGoalIcon(name) {
   return "🎯";
 }
 
-function saveCommonSavings() {
+function saveCommonSavings(){
 
   const amount =
     document.getElementById(
@@ -72,7 +72,7 @@ function saveCommonSavings() {
   displayGoals();
 }
 
-function addGoal() {
+function addGoal(){
 
   const name =
     document.getElementById(
@@ -159,13 +159,9 @@ function displayGoals(){
 
   let totalSaved = 0;
 
-  let totalGoalAmount = 0;
-
   goals.forEach((goal,index)=>{
 
     totalSaved += goal.saved;
-
-    totalGoalAmount += goal.target;
 
     const percent = Math.floor(
 
@@ -260,7 +256,7 @@ function displayGoals(){
   });
 
   const balance =
-    totalGoalAmount - totalSaved;
+    commonSavings - totalSaved;
 
   document.getElementById(
     "commonSavings"
@@ -276,7 +272,7 @@ function displayGoals(){
       opacity:0.9;
       margin-bottom:8px;
     ">
-      Total Goal Amount
+      Total Savings
     </div>
 
     <div style="
@@ -284,7 +280,7 @@ function displayGoals(){
       font-weight:bold;
       margin-bottom:20px;
     ">
-      ₹${formatMoney(totalGoalAmount)}
+      ₹${formatMoney(commonSavings)}
     </div>
 
     <div style="
