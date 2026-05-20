@@ -22,15 +22,32 @@
 
     <div class="top-card">
 
-      <p>Total Saved</p>
+      <p>Total Savings Overview</p>
 
       <div id="totalSaved"></div>
+
+    </div>
+
+    <div class="common-box">
+
+      <h3>Common Savings</h3>
+
+      <input
+        type="number"
+        id="commonSavings"
+        placeholder="Enter Total Savings"
+      >
+
+      <button onclick="saveCommonSavings()">
+        Save Amount
+      </button>
 
     </div>
 
     <div class="form">
 
       <div class="input-box">
+
         <span>🎯</span>
 
         <input
@@ -38,9 +55,11 @@
           id="goalName"
           placeholder="Goal Name"
         >
+
       </div>
 
       <div class="input-box">
+
         <span>₹</span>
 
         <input
@@ -48,6 +67,7 @@
           id="goalAmount"
           placeholder="Target Amount"
         >
+
       </div>
 
       <button onclick="addGoal()">

@@ -1,42 +1,62 @@
 let goals = JSON.parse(localStorage.getItem("goals")) || [];
 
-function saveGoals() {
+let commonSavings =
+  Number(localStorage.getItem("commonSavings")) || 0;
+
+function saveGoals(){
   localStorage.setItem("goals", JSON.stringify(goals));
 }
 
-function formatMoney(amount) {
+function formatMoney(amount){
   return amount.toLocaleString("en-IN");
 }
 
-function getGoalIcon(name) {
+function getGoalIcon(name){
 
   name = name.toLowerCase();
 
-  if (name.includes("bike")) return "🏍️";
-  if (name.includes("car")) return "🚗";
-  if (name.includes("trip")) return "✈️";
-  if (name.includes("study")) return "🎓";
-  if (name.includes("phone")) return "📱";
-  if (name.includes("laptop")) return "💻";
+  if(name.includes("bike")) return "🏍️";
+  if(name.includes("car")) return "🚗";
+  if(name.includes("trip")) return "✈️";
+  if(name.includes("study")) return "🎓";
+  if(name.includes("phone")) return "📱";
+  if(name.includes("laptop")) return "💻";
 
   return "🎯";
 }
 
-function addGoal() {
+function saveCommonSavings(){
 
-  const name = document.getElementById("goalName").value;
+  const amount =
+    document.getElementById("commonSavings").value;
 
-  const amount = document.getElementById("goalAmount").value;
+  commonSavings = Number(amount);
 
-  if (name === "" || amount === "") {
+  localStorage.setItem(
+    "commonSavings",
+    commonSavings
+  );
+
+  displayGoals();
+}
+
+function addGoal(){
+
+  const name =
+    document.getElementById("goalName").value;
+
+  const amount =
+    document.getElementById("goalAmount").value;
+
+  if(name === "" || amount === ""){
     alert("Please enter all fields");
     return;
   }
 
   goals.push({
-    name: name,
-    target: Number(amount),
-    saved: 0
+    name:name,
+    target:Number(amount),
+    saved:0
   });
 
   saveGoals();
@@ -48,15 +68,15 @@ function addGoal() {
   document.getElementById("goalAmount").value = "";
 }
 
-function updateMoney(index, value) {
+function updateMoney(index,value){
 
   goals[index].saved += value;
 
-  if (goals[index].saved < 0) {
+  if(goals[index].saved < 0){
     goals[index].saved = 0;
   }
 
-  if (goals[index].saved > goals[index].target) {
+  if(goals[index].saved > goals[index].target){
     goals[index].saved = goals[index].target;
   }
 
@@ -65,30 +85,27 @@ function updateMoney(index, value) {
   displayGoals();
 }
 
-function deleteGoal(index) {
+function deleteGoal(index){
 
-  goals.splice(index, 1);
+  goals.splice(index,1);
 
   saveGoals();
 
   displayGoals();
 }
 
-function displayGoals() {
+function displayGoals(){
 
-  const goalList = document.getElementById("goalList");
+  const goalList =
+    document.getElementById("goalList");
 
   goalList.innerHTML = "";
 
   let totalSaved = 0;
 
-  let totalGoal = 0;
-
-  goals.forEach((goal, index) => {
+  goals.forEach((goal,index)=>{
 
     totalSaved += goal.saved;
-
-    totalGoal += goal.target;
 
     const percent = Math.floor(
       (goal.saved / goal.target) * 100
@@ -163,9 +180,7 @@ function displayGoals() {
           <div
             class="progress-bar"
             style="width:${percent}%"
-          >
-            ${percent}%
-          </div>
+          ></div>
 
         </div>
 
@@ -174,7 +189,10 @@ function displayGoals() {
     `;
   });
 
-  const balance = totalGoal - totalSaved;
+  const balance = commonSavings - totalSaved;
+
+  document.getElementById("commonSavings").value =
+    commonSavings;
 
   document.getElementById("totalSaved").innerHTML = `
 
@@ -183,7 +201,7 @@ function displayGoals() {
       opacity:0.9;
       margin-bottom:8px;
     ">
-      Saved Amount
+      Total Savings
     </div>
 
     <div style="
@@ -191,7 +209,7 @@ function displayGoals() {
       font-weight:bold;
       margin-bottom:20px;
     ">
-      ₹${formatMoney(totalSaved)}
+      ₹${formatMoney(commonSavings)}
     </div>
 
     <div style="
@@ -199,14 +217,23 @@ function displayGoals() {
       opacity:0.9;
       margin-bottom:8px;
     ">
-      Balance Amount
+      Remaining Balance
     </div>
 
     <div style="
-      font-size:40px;
+      font-size:42px;
       font-weight:bold;
     ">
       ₹${formatMoney(balance)}
+    </div>
+
+    <div style="
+      margin-top:18px;
+      font-size:16px;
+      opacity:0.9;
+    ">
+      Goal Savings Used:
+      ₹${formatMoney(totalSaved)}
     </div>
 
   `;
@@ -214,9 +241,9 @@ function displayGoals() {
 
 displayGoals();
 
-if ("serviceWorker" in navigator) {
+if("serviceWorker" in navigator){
 
-  window.addEventListener("load", () => {
+  window.addEventListener("load",()=>{
 
     navigator.serviceWorker.register("sw.js");
 
