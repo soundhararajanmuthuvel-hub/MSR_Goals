@@ -159,9 +159,13 @@ function displayGoals(){
 
   let totalSaved = 0;
 
+  let totalGoalAmount = 0;
+
   goals.forEach((goal,index)=>{
 
     totalSaved += goal.saved;
+
+    totalGoalAmount += goal.target;
 
     const percent = Math.floor(
 
@@ -256,7 +260,7 @@ function displayGoals(){
   });
 
   const balance =
-    commonSavings - totalSaved;
+    totalGoalAmount - totalSaved;
 
   document.getElementById(
     "commonSavings"
@@ -272,7 +276,7 @@ function displayGoals(){
       opacity:0.9;
       margin-bottom:8px;
     ">
-      Total Savings
+      Total Goal Amount
     </div>
 
     <div style="
@@ -280,7 +284,7 @@ function displayGoals(){
       font-weight:bold;
       margin-bottom:20px;
     ">
-      ₹${formatMoney(commonSavings)}
+      ₹${formatMoney(totalGoalAmount)}
     </div>
 
     <div style="
