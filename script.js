@@ -122,17 +122,35 @@ function displayGoals() {
   const balance = totalGoal - totalSaved;
 
   document.getElementById("totalSaved").innerHTML = `
-  
-    ₹${totalSaved}
 
-    <br>
-
-    <span style="
-      font-size:16px;
-      font-weight:normal;
+    <div style="
+      font-size:18px;
+      margin-bottom:10px;
     ">
-      Balance: ₹${balance}
-    </span>
+      Saved
+    </div>
+
+    <div style="
+      font-size:22px;
+      font-weight:bold;
+      margin-bottom:15px;
+    ">
+      ₹${totalSaved}
+    </div>
+
+    <div style="
+      font-size:42px;
+      font-weight:bold;
+    ">
+      ₹${balance}
+    </div>
+
+    <div style="
+      font-size:18px;
+      margin-top:5px;
+    ">
+      Balance
+    </div>
 
   `;
 }
