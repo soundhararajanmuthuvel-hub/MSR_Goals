@@ -1,23 +1,23 @@
 let goals = JSON.parse(localStorage.getItem("goals")) || [];
 
-function saveGoals(){
+function saveGoals() {
   localStorage.setItem("goals", JSON.stringify(goals));
 }
 
-function addGoal(){
+function addGoal() {
 
   const name = document.getElementById("goalName").value;
   const amount = document.getElementById("goalAmount").value;
 
-  if(name === "" || amount === ""){
+  if (name === "" || amount === "") {
     alert("Please enter all fields");
     return;
   }
 
   goals.push({
-    name:name,
-    target:Number(amount),
-    saved:0
+    name: name,
+    target: Number(amount),
+    saved: 0
   });
 
   saveGoals();
@@ -28,15 +28,15 @@ function addGoal(){
   document.getElementById("goalAmount").value = "";
 }
 
-function updateMoney(index, value){
+function updateMoney(index, value) {
 
   goals[index].saved += value;
 
-  if(goals[index].saved < 0){
+  if (goals[index].saved < 0) {
     goals[index].saved = 0;
   }
 
-  if(goals[index].saved > goals[index].target){
+  if (goals[index].saved > goals[index].target) {
     goals[index].saved = goals[index].target;
   }
 
@@ -45,26 +45,30 @@ function updateMoney(index, value){
   displayGoals();
 }
 
-function deleteGoal(index){
+function deleteGoal(index) {
 
-  goals.splice(index,1);
+  goals.splice(index, 1);
 
   saveGoals();
 
   displayGoals();
 }
 
-function displayGoals(){
+function displayGoals() {
 
   const goalList = document.getElementById("goalList");
 
   goalList.innerHTML = "";
 
-  let total = 0;
+  let totalSaved = 0;
 
-  goals.forEach((goal,index)=>{
+  let totalGoal = 0;
 
-    total += goal.saved;
+  goals.forEach((goal, index) => {
+
+    totalSaved += goal.saved;
+
+    totalGoal += goal.target;
 
     const percent = (goal.saved / goal.target) * 100;
 
@@ -115,7 +119,22 @@ function displayGoals(){
     `;
   });
 
-  document.getElementById("totalSaved").innerText = `₹${total}`;
+  const balance = totalGoal - totalSaved;
+
+  document.getElementById("totalSaved").innerHTML = `
+  
+    ₹${totalSaved}
+
+    <br>
+
+    <span style="
+      font-size:16px;
+      font-weight:normal;
+    ">
+      Balance: ₹${balance}
+    </span>
+
+  `;
 }
 
 displayGoals();
