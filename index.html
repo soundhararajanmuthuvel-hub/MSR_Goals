@@ -2,16 +2,14 @@
 <html lang="en">
 <head>
 
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>MSR Goals</title>
 
   <meta name="theme-color" content="#4CAF50">
 
   <link rel="manifest" href="manifest.json">
-
-  <link rel="apple-touch-icon" href="icon-192.png">
 
   <link rel="stylesheet" href="style.css">
 
@@ -26,23 +24,31 @@
 
       <p>Total Saved</p>
 
-      <h2 id="totalSaved">₹0</h2>
+      <div id="totalSaved"></div>
 
     </div>
 
     <div class="form">
 
-      <input
-        type="text"
-        id="goalName"
-        placeholder="Goal Name"
-      >
+      <div class="input-box">
+        <span>🎯</span>
 
-      <input
-        type="number"
-        id="goalAmount"
-        placeholder="Target Amount"
-      >
+        <input
+          type="text"
+          id="goalName"
+          placeholder="Goal Name"
+        >
+      </div>
+
+      <div class="input-box">
+        <span>₹</span>
+
+        <input
+          type="number"
+          id="goalAmount"
+          placeholder="Target Amount"
+        >
+      </div>
 
       <button onclick="addGoal()">
         Add Goal
@@ -50,7 +56,15 @@
 
     </div>
 
+    <h2 class="goal-title">
+      Your Goals
+    </h2>
+
     <div id="goalList"></div>
+
+    <p class="footer">
+      Data is saved locally on your device.
+    </p>
 
   </div>
 

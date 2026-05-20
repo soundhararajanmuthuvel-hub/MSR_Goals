@@ -1,23 +1,38 @@
 let goals = JSON.parse(localStorage.getItem("goals")) || [];
 
-function saveGoals() {
+function saveGoals(){
   localStorage.setItem("goals", JSON.stringify(goals));
 }
 
-function addGoal() {
+function getGoalIcon(name){
+
+  name = name.toLowerCase();
+
+  if(name.includes("bike")) return "🏍️";
+  if(name.includes("car")) return "🚗";
+  if(name.includes("trip")) return "✈️";
+  if(name.includes("study")) return "🎓";
+  if(name.includes("phone")) return "📱";
+  if(name.includes("laptop")) return "💻";
+
+  return "🎯";
+}
+
+function addGoal(){
 
   const name = document.getElementById("goalName").value;
+
   const amount = document.getElementById("goalAmount").value;
 
-  if (name === "" || amount === "") {
+  if(name === "" || amount === ""){
     alert("Please enter all fields");
     return;
   }
 
   goals.push({
-    name: name,
-    target: Number(amount),
-    saved: 0
+    name:name,
+    target:Number(amount),
+    saved:0
   });
 
   saveGoals();
@@ -25,18 +40,19 @@ function addGoal() {
   displayGoals();
 
   document.getElementById("goalName").value = "";
+
   document.getElementById("goalAmount").value = "";
 }
 
-function updateMoney(index, value) {
+function updateMoney(index,value){
 
   goals[index].saved += value;
 
-  if (goals[index].saved < 0) {
+  if(goals[index].saved < 0){
     goals[index].saved = 0;
   }
 
-  if (goals[index].saved > goals[index].target) {
+  if(goals[index].saved > goals[index].target){
     goals[index].saved = goals[index].target;
   }
 
@@ -45,16 +61,16 @@ function updateMoney(index, value) {
   displayGoals();
 }
 
-function deleteGoal(index) {
+function deleteGoal(index){
 
-  goals.splice(index, 1);
+  goals.splice(index,1);
 
   saveGoals();
 
   displayGoals();
 }
 
-function displayGoals() {
+function displayGoals(){
 
   const goalList = document.getElementById("goalList");
 
@@ -64,53 +80,85 @@ function displayGoals() {
 
   let totalGoal = 0;
 
-  goals.forEach((goal, index) => {
+  goals.forEach((goal,index)=>{
 
     totalSaved += goal.saved;
 
     totalGoal += goal.target;
 
-    const percent = (goal.saved / goal.target) * 100;
+    const percent = Math.floor(
+      (goal.saved / goal.target) * 100
+    );
 
     goalList.innerHTML += `
 
       <div class="goal-card">
 
-        <h3>${goal.name}</h3>
+        <div class="goal-top">
 
-        <p><b>Target:</b> ₹${goal.target}</p>
+          <div class="goal-left">
 
-        <p><b>Saved:</b> ₹${goal.saved}</p>
+            <div class="goal-icon">
+              ${getGoalIcon(goal.name)}
+            </div>
 
-        <p><b>Remaining:</b> ₹${goal.target - goal.saved}</p>
+            <div class="goal-info">
+
+              <h3>${goal.name}</h3>
+
+              <p>
+
+                Target: ₹${goal.target}
+
+                •
+
+                Saved: ₹${goal.saved}
+
+                •
+
+                Remaining: ₹${goal.target - goal.saved}
+
+              </p>
+
+            </div>
+
+          </div>
+
+          <div class="actions">
+
+            <button
+              class="plus-btn"
+              onclick="updateMoney(${index},100)"
+            >
+              + ₹100
+            </button>
+
+            <button
+              class="minus-btn"
+              onclick="updateMoney(${index},-100)"
+            >
+              - ₹100
+            </button>
+
+            <button
+              class="delete-btn"
+              onclick="deleteGoal(${index})"
+            >
+              Delete
+            </button>
+
+          </div>
+
+        </div>
 
         <div class="progress">
 
           <div
             class="progress-bar"
             style="width:${percent}%"
-          ></div>
-
-        </div>
-
-        <p>${Math.floor(percent)}% Completed</p>
-
-        <div class="actions">
-
-          <button onclick="updateMoney(${index},100)">
-            + ₹100
-          </button>
-
-          <button onclick="updateMoney(${index},-100)">
-            - ₹100
-          </button>
-
-          <button
-            class="delete-btn"
-            onclick="deleteGoal(${index})"
           >
-            Delete
-          </button>
+            ${percent}%
+          </div>
 
         </div>
 
@@ -124,30 +172,30 @@ function displayGoals() {
   document.getElementById("totalSaved").innerHTML = `
 
     <div style="
-      font-size:18px;
-      margin-bottom:10px;
+      font-size:24px;
+      margin-bottom:15px;
     ">
       Saved
     </div>
 
     <div style="
-      font-size:22px;
+      font-size:40px;
       font-weight:bold;
-      margin-bottom:15px;
+      margin-bottom:20px;
     ">
       ₹${totalSaved}
     </div>
 
     <div style="
-      font-size:42px;
+      font-size:70px;
       font-weight:bold;
     ">
       ₹${balance}
     </div>
 
     <div style="
-      font-size:18px;
-      margin-top:5px;
+      font-size:28px;
+      margin-top:10px;
     ">
       Balance
     </div>
@@ -157,14 +205,11 @@ function displayGoals() {
 
 displayGoals();
 
-if ("serviceWorker" in navigator) {
+if("serviceWorker" in navigator){
 
-  window.addEventListener("load", () => {
+  window.addEventListener("load",()=>{
 
-    navigator.serviceWorker.register("sw.js")
-      .then(() => {
-        console.log("PWA Ready");
-      });
+    navigator.serviceWorker.register("sw.js");
 
   });
 
