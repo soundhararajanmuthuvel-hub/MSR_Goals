@@ -1,28 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
   <title>MSR Goals</title>
 
-  <link rel="stylesheet" href="style.css">
+  <meta name="theme-color" content="#4CAF50">
+
   <link rel="manifest" href="manifest.json">
+
+  <link rel="apple-touch-icon" href="icon-192.png">
+
+  <link rel="stylesheet" href="style.css">
+
 </head>
 <body>
 
   <div class="container">
 
-    <h1>MSR Goals</h1>
+    <h1 class="logo">MSR Goals</h1>
+
+    <div class="top-card">
+
+      <p>Total Saved</p>
+
+      <h2 id="totalSaved">₹0</h2>
+
+    </div>
 
     <div class="form">
-      <input type="text" id="goalName" placeholder="Goal Name">
 
-      <input type="number" id="goalAmount" placeholder="Target Amount">
+      <input
+        type="text"
+        id="goalName"
+        placeholder="Goal Name"
+      >
+
+      <input
+        type="number"
+        id="goalAmount"
+        placeholder="Target Amount"
+      >
 
       <button onclick="addGoal()">
         Add Goal
       </button>
+
     </div>
 
     <div id="goalList"></div>

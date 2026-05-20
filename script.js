@@ -10,7 +10,7 @@ function addGoal(){
   const amount = document.getElementById("goalAmount").value;
 
   if(name === "" || amount === ""){
-    alert("Enter all fields");
+    alert("Please enter all fields");
     return;
   }
 
@@ -21,6 +21,7 @@ function addGoal(){
   });
 
   saveGoals();
+
   displayGoals();
 
   document.getElementById("goalName").value = "";
@@ -40,6 +41,7 @@ function updateMoney(index, value){
   }
 
   saveGoals();
+
   displayGoals();
 }
 
@@ -48,6 +50,7 @@ function deleteGoal(index){
   goals.splice(index,1);
 
   saveGoals();
+
   displayGoals();
 }
 
@@ -57,12 +60,16 @@ function displayGoals(){
 
   goalList.innerHTML = "";
 
+  let total = 0;
+
   goals.forEach((goal,index)=>{
+
+    total += goal.saved;
 
     const percent = (goal.saved / goal.target) * 100;
 
     goalList.innerHTML += `
-    
+
       <div class="goal-card">
 
         <h3>${goal.name}</h3>
@@ -74,7 +81,12 @@ function displayGoals(){
         <p><b>Remaining:</b> ₹${goal.target - goal.saved}</p>
 
         <div class="progress">
-          <div class="progress-bar" style="width:${percent}%"></div>
+
+          <div
+            class="progress-bar"
+            style="width:${percent}%"
+          ></div>
+
         </div>
 
         <p>${Math.floor(percent)}% Completed</p>
@@ -89,7 +101,10 @@ function displayGoals(){
             - ₹100
           </button>
 
-          <button class="delete-btn" onclick="deleteGoal(${index})">
+          <button
+            class="delete-btn"
+            onclick="deleteGoal(${index})"
+          >
             Delete
           </button>
 
@@ -99,10 +114,21 @@ function displayGoals(){
 
     `;
   });
+
+  document.getElementById("totalSaved").innerText = `₹${total}`;
 }
 
 displayGoals();
 
 if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("sw.js");
+
+  window.addEventListener("load", () => {
+
+    navigator.serviceWorker.register("sw.js")
+      .then(() => {
+        console.log("PWA Ready");
+      });
+
+  });
+
 }
