@@ -3,32 +3,41 @@ let goals = JSON.parse(localStorage.getItem("goals")) || [];
 let commonSavings =
   Number(localStorage.getItem("commonSavings")) || 0;
 
-function saveGoals(){
-  localStorage.setItem("goals", JSON.stringify(goals));
+function saveGoals() {
+  localStorage.setItem(
+    "goals",
+    JSON.stringify(goals)
+  );
 }
 
-function formatMoney(amount){
-  return amount.toLocaleString("en-IN");
+function formatMoney(amount) {
+
+  return Number(amount)
+    .toLocaleString("en-IN");
+
 }
 
-function getGoalIcon(name){
+function getGoalIcon(name) {
 
   name = name.toLowerCase();
 
-  if(name.includes("bike")) return "🏍️";
-  if(name.includes("car")) return "🚗";
-  if(name.includes("trip")) return "✈️";
-  if(name.includes("study")) return "🎓";
-  if(name.includes("phone")) return "📱";
-  if(name.includes("laptop")) return "💻";
+  if (name.includes("bike")) return "🏍️";
+  if (name.includes("car")) return "🚗";
+  if (name.includes("trip")) return "✈️";
+  if (name.includes("study")) return "🎓";
+  if (name.includes("phone")) return "📱";
+  if (name.includes("laptop")) return "💻";
+  if (name.includes("house")) return "🏠";
 
   return "🎯";
 }
 
-function saveCommonSavings(){
+function saveCommonSavings() {
 
   const amount =
-    document.getElementById("commonSavings").value;
+    document.getElementById(
+      "commonSavings"
+    ).value;
 
   commonSavings = Number(amount);
 
@@ -40,44 +49,64 @@ function saveCommonSavings(){
   displayGoals();
 }
 
-function addGoal(){
+function addGoal() {
 
   const name =
-    document.getElementById("goalName").value;
+    document.getElementById(
+      "goalName"
+    ).value;
 
   const amount =
-    document.getElementById("goalAmount").value;
+    document.getElementById(
+      "goalAmount"
+    ).value;
 
-  if(name === "" || amount === ""){
+  if (name === "" || amount === "") {
+
     alert("Please enter all fields");
+
     return;
   }
 
   goals.push({
-    name:name,
-    target:Number(amount),
-    saved:0
+
+    name: name,
+
+    target: Number(amount),
+
+    saved: 0
+
   });
 
   saveGoals();
 
   displayGoals();
 
-  document.getElementById("goalName").value = "";
+  document.getElementById(
+    "goalName"
+  ).value = "";
 
-  document.getElementById("goalAmount").value = "";
+  document.getElementById(
+    "goalAmount"
+  ).value = "";
 }
 
-function updateMoney(index,value){
+function updateMoney(index, value) {
 
   goals[index].saved += value;
 
-  if(goals[index].saved < 0){
+  if (goals[index].saved < 0) {
+
     goals[index].saved = 0;
   }
 
-  if(goals[index].saved > goals[index].target){
-    goals[index].saved = goals[index].target;
+  if (
+    goals[index].saved >
+    goals[index].target
+  ) {
+
+    goals[index].saved =
+      goals[index].target;
   }
 
   saveGoals();
@@ -85,25 +114,27 @@ function updateMoney(index,value){
   displayGoals();
 }
 
-function deleteGoal(index){
+function deleteGoal(index) {
 
-  goals.splice(index,1);
+  goals.splice(index, 1);
 
   saveGoals();
 
   displayGoals();
 }
 
-function displayGoals(){
+function displayGoals() {
 
   const goalList =
-    document.getElementById("goalList");
+    document.getElementById(
+      "goalList"
+    );
 
   goalList.innerHTML = "";
 
   let totalSaved = 0;
 
-  goals.forEach((goal,index)=>{
+  goals.forEach((goal, index) => {
 
     totalSaved += goal.saved;
 
@@ -140,7 +171,9 @@ function displayGoals(){
                 •
 
                 Remaining:
-                ₹${formatMoney(goal.target - goal.saved)}
+                ₹${formatMoney(
+                  goal.target - goal.saved
+                )}
 
               </p>
 
@@ -180,7 +213,11 @@ function displayGoals(){
           <div
             class="progress-bar"
             style="width:${percent}%"
-          ></div>
+          >
+
+            ${percent}%
+
+          </div>
 
         </div>
 
@@ -189,12 +226,16 @@ function displayGoals(){
     `;
   });
 
-  const balance = commonSavings - totalSaved;
+  const balance =
+    commonSavings - totalSaved;
 
-  document.getElementById("commonSavings").value =
-    commonSavings;
+  document.getElementById(
+    "commonSavings"
+  ).value = commonSavings;
 
-  document.getElementById("totalSaved").innerHTML = `
+  document.getElementById(
+    "totalSaved"
+  ).innerHTML = `
 
     <div style="
       font-size:18px;
@@ -205,7 +246,7 @@ function displayGoals(){
     </div>
 
     <div style="
-      font-size:30px;
+      font-size:34px;
       font-weight:bold;
       margin-bottom:20px;
     ">
@@ -221,8 +262,9 @@ function displayGoals(){
     </div>
 
     <div style="
-      font-size:42px;
+      font-size:58px;
       font-weight:bold;
+      letter-spacing:1px;
     ">
       ₹${formatMoney(balance)}
     </div>
@@ -241,12 +283,16 @@ function displayGoals(){
 
 displayGoals();
 
-if("serviceWorker" in navigator){
+if ("serviceWorker" in navigator) {
 
-  window.addEventListener("load",()=>{
+  window.addEventListener(
+    "load",
+    () => {
 
-    navigator.serviceWorker.register("sw.js");
+      navigator.serviceWorker
+        .register("sw.js");
 
-  });
+    }
+  );
 
 }
