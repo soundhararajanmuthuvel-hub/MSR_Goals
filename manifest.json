@@ -1,11 +1,20 @@
 {
   "name": "MSR Goals",
-  "short_name": "MSR",
-  "start_url": "/",
+  "short_name": "MSR Goals",
+  "description": "A premium offline-first savings goal tracker built with vanilla web technologies.",
+  "id": "msr-goals",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#4CAF50",
-  "orientation": "portrait",
+  "display_override": [
+    "window-controls-overlay",
+    "standalone"
+  ],
+  "orientation": "portrait-primary",
+  "theme_color": "#050505",
+  "background_color": "#020202",
+  "lang": "en",
+  "dir": "ltr",
   "icons": [
     {
       "src": "icon-192.png",

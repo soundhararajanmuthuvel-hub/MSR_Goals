@@ -1,124 +1,189 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
   <meta charset="UTF-8">
-
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
-
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="theme-color" content="#050505">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="MSR Goals">
   <title>MSR Goals</title>
-
-  <meta
-    name="theme-color"
-    content="#22c55e"
-  >
-
-  <link
-    rel="manifest"
-    href="manifest.json"
-  >
-
-  <link
-    rel="icon"
-    type="image/png"
-    href="icon-192.png"
-  >
-
-  <link
-    rel="apple-touch-icon"
-    href="icon-192.png"
-  >
-
-  <link
-    rel="stylesheet"
-    href="style.css"
-  >
-
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <link rel="shortcut icon" href="icon-192.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <div class="bg-orb bg-orb--left" aria-hidden="true"></div>
+  <div class="bg-orb bg-orb--right" aria-hidden="true"></div>
 
-  <div class="container">
+  <div class="app-shell">
+    <header class="hero panel">
+      <div class="topbar">
+        <div class="brand">
+          <div class="brand__badge" aria-hidden="true">MSR</div>
+          <div>
+            <p class="eyebrow">Personal finance cockpit</p>
+            <h1>MSR Goals</h1>
+          </div>
+        </div>
 
-    <h1 class="logo">
-      MSR Goals
-    </h1>
-
-    <div class="top-card">
-
-      <p class="top-title">
-        Total Savings Overview
-      </p>
-
-      <div id="totalSaved"></div>
-
-    </div>
-
-    <div class="common-box">
-
-      <h3>
-        Common Savings
-      </h3>
-
-      <input
-        type="number"
-        id="commonSavings"
-        placeholder="Enter Total Savings"
-      >
-
-      <button onclick="saveCommonSavings()">
-        Save Amount
-      </button>
-
-    </div>
-
-    <div class="form">
-
-      <div class="input-box">
-
-        <span>🎯</span>
-
-        <input
-          type="text"
-          id="goalName"
-          placeholder="Goal Name"
-        >
-
+        <button class="ghost-btn install-btn" id="installBtn" type="button" hidden>
+          Install App
+        </button>
       </div>
 
-      <div class="input-box">
-
-        <span>₹</span>
-
-        <input
-          type="number"
-          id="goalAmount"
-          placeholder="Target Amount"
-        >
-
+      <div class="hero__content">
+        <div class="hero__balance">
+          <div class="balance-panel">
+            <span class="balance-panel__label">Remaining Balance</span>
+            <strong id="remainingBalanceDisplay" class="balance-panel__value" aria-live="polite">
+              ₹0
+            </strong>
+            <span id="balanceNote" class="balance-panel__note">
+              Common savings minus goal savings used
+            </span>
+          </div>
+        </div>
       </div>
+    </header>
 
-      <button onclick="addGoal()">
-        Add Goal
-      </button>
+    <main class="dashboard">
+      <section class="stats-grid" aria-label="Savings overview">
+        <article class="stat-card">
+          <span class="stat-card__label">Total Savings</span>
+          <strong id="totalSavingsDisplay" class="stat-card__value" aria-live="polite">
+            ₹0
+          </strong>
+          <p class="stat-card__note">Your common savings pool</p>
+        </article>
 
-    </div>
+        <article class="stat-card">
+          <span class="stat-card__label">Goal Savings Used</span>
+          <strong id="goalSavingsUsedDisplay" class="stat-card__value" aria-live="polite">
+            ₹0
+          </strong>
+          <p class="stat-card__note">Currently allocated to goals</p>
+        </article>
 
-    <h2 class="goal-title">
-      Your Goals
-    </h2>
+        <article class="stat-card">
+          <span class="stat-card__label">Goal Amount Remaining</span>
+          <strong id="goalAmountRemainingDisplay" class="stat-card__value" aria-live="polite">
+            ₹0
+          </strong>
+          <p class="stat-card__note">Total amount still needed for all goals</p>
+        </article>
 
-    <div id="goalList"></div>
+        <article class="stat-card stat-card--accent">
+          <span class="stat-card__label">Remaining Balance</span>
+          <strong id="remainingSavingsDisplay" class="stat-card__value" aria-live="polite">
+            ₹0
+          </strong>
+          <p class="stat-card__note">What is still available</p>
+        </article>
+      </section>
 
-    <p class="footer">
-      Data is saved locally on your device.
-    </p>
+      <section class="panel">
+        <div class="panel__header">
+          <div>
+            <p class="panel__eyebrow">Common Savings</p>
+            <h3>Set the total savings pool</h3>
+          </div>
+          <span class="panel__meta">Stored in localStorage</span>
+        </div>
 
+        <form class="stack-form" id="commonSavingsForm">
+          <label class="field">
+            <span class="field__label">Total savings amount</span>
+            <div class="currency-field">
+              <span class="currency-field__prefix" aria-hidden="true">₹</span>
+              <input
+                id="commonSavingsInput"
+                type="number"
+                min="0"
+                step="1"
+                inputmode="numeric"
+                autocomplete="off"
+                placeholder="Enter total savings"
+              >
+            </div>
+          </label>
+
+          <button class="primary-btn" type="submit">Save Amount</button>
+        </form>
+      </section>
+
+      <section class="panel">
+        <div class="panel__header">
+          <div>
+            <p class="panel__eyebrow">Goal Management</p>
+            <h3>Add a new goal</h3>
+          </div>
+          <span class="panel__meta">One tap adds or subtracts ₹100</span>
+        </div>
+
+        <form class="goal-form" id="goalForm">
+          <label class="field">
+            <span class="field__label">Goal name</span>
+            <input
+              id="goalNameInput"
+              type="text"
+              maxlength="50"
+              autocomplete="off"
+              autocapitalize="words"
+              spellcheck="false"
+              placeholder="Bike, Car, Trip, House..."
+            >
+          </label>
+
+          <label class="field">
+            <span class="field__label">Target amount</span>
+            <div class="currency-field">
+              <span class="currency-field__prefix" aria-hidden="true">₹</span>
+              <input
+                id="goalTargetInput"
+                type="number"
+                min="1"
+                step="1"
+                inputmode="numeric"
+                autocomplete="off"
+                placeholder="Enter target amount"
+              >
+            </div>
+          </label>
+
+          <button class="primary-btn" type="submit">Add Goal</button>
+        </form>
+      </section>
+
+      <section class="panel panel--list">
+        <div class="panel__header">
+          <div>
+            <p class="panel__eyebrow">Your Goals</p>
+            <h3>Track progress and manage savings</h3>
+          </div>
+          <span class="panel__meta" id="goalCount">0 goals</span>
+        </div>
+
+        <div id="goalList" class="goal-list" role="list" aria-live="polite"></div>
+
+        <div id="emptyState" class="empty-state">
+          <div class="empty-state__icon" aria-hidden="true">🎯</div>
+          <h4>No goals yet</h4>
+          <p>Add your first savings goal to start tracking progress.</p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p>MSR Goals saves everything locally on your device and works offline after install.</p>
+    </footer>
   </div>
 
-  <script src="script.js"></script>
+  <div id="toast" class="toast" aria-live="polite" aria-atomic="true"></div>
 
+  <script src="script.js" defer></script>
 </body>
 </html>

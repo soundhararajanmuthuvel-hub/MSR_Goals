@@ -1,301 +1,535 @@
-let goals =
-JSON.parse(
-  localStorage.getItem("goals")
-) || [];
+const STORAGE_KEYS = {
+  goals: "msrGoals_goals",
+  commonSavings: "msrGoals_commonSavings",
+};
 
-let commonSavings =
-Number(
-  localStorage.getItem(
-    "commonSavings"
-  )
-) || 0;
+const LEGACY_KEYS = {
+  goals: "goals",
+  commonSavings: "commonSavings",
+};
 
-function saveGoals(){
+const elements = {
+  commonSavingsForm: document.getElementById("commonSavingsForm"),
+  commonSavingsInput: document.getElementById("commonSavingsInput"),
+  goalForm: document.getElementById("goalForm"),
+  goalNameInput: document.getElementById("goalNameInput"),
+  goalTargetInput: document.getElementById("goalTargetInput"),
+  goalList: document.getElementById("goalList"),
+  emptyState: document.getElementById("emptyState"),
+  goalCount: document.getElementById("goalCount"),
+  totalSavingsDisplay: document.getElementById("totalSavingsDisplay"),
+  goalSavingsUsedDisplay: document.getElementById("goalSavingsUsedDisplay"),
+  goalAmountRemainingDisplay: document.getElementById("goalAmountRemainingDisplay"),
+  remainingSavingsDisplay: document.getElementById("remainingSavingsDisplay"),
+  remainingBalanceDisplay: document.getElementById("remainingBalanceDisplay"),
+  balanceNote: document.getElementById("balanceNote"),
+  toast: document.getElementById("toast"),
+  installBtn: document.getElementById("installBtn"),
+};
 
-  localStorage.setItem(
-    "goals",
-    JSON.stringify(goals)
+let goals = [];
+let commonSavings = 0;
+let deferredInstallPrompt = null;
+let toastTimer = null;
+
+function escapeHtml(value) {
+  const entities = {
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;",
+  };
+
+  return String(value).replace(/[&<>"']/g, (char) => entities[char]);
+}
+
+function toInteger(value) {
+  const number = Number(value);
+  return Number.isFinite(number) ? Math.round(number) : 0;
+}
+
+function normalizeMoney(value) {
+  return Math.max(0, toInteger(value));
+}
+
+function clamp(value, min, max) {
+  return Math.min(max, Math.max(min, value));
+}
+
+function createGoalId() {
+  if (window.crypto && typeof window.crypto.randomUUID === "function") {
+    return window.crypto.randomUUID();
+  }
+
+  return `goal_${Date.now()}_${Math.random().toString(16).slice(2, 8)}`;
+}
+
+function normalizeGoal(goal) {
+  if (!goal || typeof goal !== "object") {
+    return null;
+  }
+
+  const name = typeof goal.name === "string" ? goal.name.trim() : "";
+  const target = normalizeMoney(goal.target);
+
+  if (!name || target < 1) {
+    return null;
+  }
+
+  const saved = clamp(normalizeMoney(goal.saved), 0, target);
+  const id = typeof goal.id === "string" && goal.id ? goal.id : createGoalId();
+
+  return { id, name, target, saved };
+}
+
+function readStoredValue(primaryKey, fallbackKey) {
+  const primary = localStorage.getItem(primaryKey);
+
+  if (primary !== null) {
+    return primary;
+  }
+
+  return localStorage.getItem(fallbackKey);
+}
+
+function loadState() {
+  const rawGoals = readStoredValue(STORAGE_KEYS.goals, LEGACY_KEYS.goals);
+  const rawCommonSavings = readStoredValue(
+    STORAGE_KEYS.commonSavings,
+    LEGACY_KEYS.commonSavings
   );
+
+  try {
+    const parsedGoals = rawGoals ? JSON.parse(rawGoals) : [];
+    goals = Array.isArray(parsedGoals)
+      ? parsedGoals.map(normalizeGoal).filter(Boolean)
+      : [];
+  } catch {
+    goals = [];
+  }
+
+  commonSavings = normalizeMoney(rawCommonSavings);
 }
 
-function formatMoney(amount){
-
-  return Number(amount)
-  .toLocaleString("en-IN");
+function persistState() {
+  localStorage.setItem(STORAGE_KEYS.goals, JSON.stringify(goals));
+  localStorage.setItem(STORAGE_KEYS.commonSavings, String(commonSavings));
 }
 
-function getGoalIcon(name){
+function formatMoney(amount) {
+  const value = Math.round(Number(amount) || 0);
+  const formatted = Math.abs(value).toLocaleString("en-IN");
+  return value < 0 ? `-₹${formatted}` : `₹${formatted}`;
+}
 
-  name = name.toLowerCase();
+function getGoalIcon(name) {
+  const lower = name.toLowerCase();
 
-  if(name.includes("bike")) return "🏍️";
-
-  if(name.includes("car")) return "🚗";
-
-  if(name.includes("trip")) return "✈️";
-
-  if(name.includes("study")) return "🎓";
-
-  if(name.includes("phone")) return "📱";
-
-  if(name.includes("laptop")) return "💻";
-
-  if(name.includes("house")) return "🏠";
+  if (lower.includes("bike")) return "🏍️";
+  if (lower.includes("car")) return "🚗";
+  if (lower.includes("trip") || lower.includes("travel") || lower.includes("tour")) {
+    return "✈️";
+  }
+  if (lower.includes("house") || lower.includes("home")) return "🏠";
+  if (lower.includes("phone") || lower.includes("mobile")) return "📱";
+  if (lower.includes("laptop") || lower.includes("computer")) return "💻";
 
   return "🎯";
 }
 
-function saveCommonSavings(){
-
-  const amount =
-  document.getElementById(
-    "commonSavings"
-  ).value.trim();
-
-  commonSavings =
-  amount === ""
-  ? 0
-  : Number(amount);
-
-  localStorage.setItem(
-    "commonSavings",
-    commonSavings
-  );
-
-  displayGoals();
-}
-
-function addGoal(){
-
-  const name =
-  document.getElementById(
-    "goalName"
-  ).value;
-
-  const amount =
-  document.getElementById(
-    "goalAmount"
-  ).value;
-
-  if(name === "" || amount === ""){
-
-    alert(
-      "Please enter all fields"
-    );
-
+function showToast(message, tone = "info") {
+  if (!elements.toast) {
     return;
   }
 
-  goals.push({
+  elements.toast.textContent = message;
+  elements.toast.dataset.tone = tone;
+  elements.toast.classList.add("is-visible");
 
-    name:name,
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    elements.toast.classList.remove("is-visible");
+  }, 2200);
+}
 
-    target:Number(amount),
+function getGoalRemaining(goal) {
+  return Math.max(goal.target - goal.saved, 0);
+}
 
-    saved:0
+function computeTotals() {
+  const goalSavingsUsed = goals.reduce((sum, goal) => sum + goal.saved, 0);
+  const goalAmountRemaining = goals.reduce((sum, goal) => sum + getGoalRemaining(goal), 0);
+  const remainingBalance = commonSavings - goalSavingsUsed;
 
+  return { goalSavingsUsed, goalAmountRemaining, remainingBalance };
+}
+
+function setNegativeState(isNegative) {
+  elements.remainingSavingsDisplay.classList.toggle("is-negative", isNegative);
+  elements.remainingBalanceDisplay.classList.toggle("is-negative", isNegative);
+  elements.remainingSavingsDisplay.classList.toggle("is-positive", !isNegative);
+  elements.remainingBalanceDisplay.classList.toggle("is-positive", !isNegative);
+}
+
+function renderProgressBars() {
+  const bars = elements.goalList.querySelectorAll(".progress__bar");
+
+  requestAnimationFrame(() => {
+    bars.forEach((bar) => {
+      const progress = Number(bar.dataset.progress) || 0;
+      bar.style.width = `${progress}%`;
+    });
   });
-
-  saveGoals();
-
-  displayGoals();
-
-  document.getElementById(
-    "goalName"
-  ).value = "";
-
-  document.getElementById(
-    "goalAmount"
-  ).value = "";
 }
 
-function updateMoney(index,value){
+function renderGoalCard(goal) {
+  const remaining = getGoalRemaining(goal);
+  const percent = goal.target > 0 ? Math.min(100, Math.round((goal.saved / goal.target) * 100)) : 0;
+  const safeId = escapeHtml(goal.id);
+  const safeName = escapeHtml(goal.name);
+  const icon = getGoalIcon(goal.name);
 
-  goals[index].saved += value;
-
-  if(goals[index].saved < 0){
-
-    goals[index].saved = 0;
-  }
-
-  if(
-    goals[index].saved >
-    goals[index].target
-  ){
-
-    goals[index].saved =
-    goals[index].target;
-  }
-
-  saveGoals();
-
-  displayGoals();
-}
-
-function deleteGoal(index){
-
-  goals.splice(index,1);
-
-  saveGoals();
-
-  displayGoals();
-}
-
-function displayGoals(){
-
-  const goalList =
-  document.getElementById(
-    "goalList"
-  );
-
-  goalList.innerHTML = "";
-
-  let totalSaved = 0;
-
-  goals.forEach((goal,index)=>{
-
-    totalSaved += goal.saved;
-
-    const percent = Math.floor(
-
-      (goal.saved / goal.target) * 100
-
-    );
-
-    goalList.innerHTML += `
-
-      <div class="goal-card">
-
-        <div class="goal-top">
-
-          <div class="goal-left">
-
-            <div class="goal-icon">
-
-              ${getGoalIcon(goal.name)}
-
-            </div>
-
-            <div class="goal-info">
-
-              <h3>${goal.name}</h3>
-
-              <p>
-
-                Target:
-                ₹${formatMoney(goal.target)}
-
-                •
-
-                Saved:
-                ₹${formatMoney(goal.saved)}
-
-                •
-
-                Remaining:
-                ₹${formatMoney(
-                  goal.target - goal.saved
-                )}
-
-              </p>
-
-            </div>
-
+  return `
+    <article class="goal-card" role="listitem" data-goal-id="${safeId}">
+      <div class="goal-card__top">
+        <div class="goal-card__identity">
+          <div class="goal-icon" aria-hidden="true">${icon}</div>
+          <div>
+            <h4 class="goal-card__title">${safeName}</h4>
+            <p class="goal-card__subtitle">Target ${formatMoney(goal.target)}</p>
           </div>
-
-          <div class="actions">
-
-            <button
-              class="plus-btn"
-              onclick="updateMoney(${index},100)"
-            >
-              + ₹100
-            </button>
-
-            <button
-              class="minus-btn"
-              onclick="updateMoney(${index},-100)"
-            >
-              - ₹100
-            </button>
-
-            <button
-              class="delete-btn"
-              onclick="deleteGoal(${index})"
-            >
-              Delete
-            </button>
-
-          </div>
-
         </div>
 
-        <div class="progress">
-
-          <div
-            class="progress-bar"
-            style="width:${percent}%"
-          >
-
-            ${percent}%
-
-          </div>
-
+        <div class="goal-card__remaining-top">
+          <span>Remaining</span>
+          <strong>${formatMoney(remaining)}</strong>
         </div>
-
       </div>
 
-    `;
-  });
+      <div class="goal-card__metrics">
+        <div class="metric">
+          <span>Target</span>
+          <strong>${formatMoney(goal.target)}</strong>
+        </div>
+        <div class="metric">
+          <span>Saved</span>
+          <strong>${formatMoney(goal.saved)}</strong>
+        </div>
+        <div class="metric">
+          <span>Remaining</span>
+          <strong>${formatMoney(remaining)}</strong>
+        </div>
+      </div>
 
-  const balance =
-  commonSavings - totalSaved;
+      <div class="goal-card__allocate">
+        <label class="sr-only" for="allocate-${safeId}">Allocate savings to ${safeName}</label>
+        <div class="currency-field currency-field--compact">
+          <span class="currency-field__prefix" aria-hidden="true">₹</span>
+          <input
+            id="allocate-${safeId}"
+            data-allocate-input
+            type="number"
+            min="1"
+            step="1"
+            inputmode="numeric"
+            autocomplete="off"
+            placeholder="Allocate savings"
+          >
+        </div>
+        <button
+          class="action-btn action-btn--allocate"
+          type="button"
+          data-action="allocate"
+          data-goal-id="${safeId}"
+        >
+          Allocate
+        </button>
+      </div>
 
-  document.getElementById(
-    "commonSavings"
-  ).value =
-  commonSavings || "";
+      <div class="progress" aria-label="${safeName} progress">
+        <div
+          class="progress__bar"
+          data-progress="${percent}"
+          role="progressbar"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          aria-valuenow="${percent}"
+        ></div>
+      </div>
+      <div class="progress__label">${percent}% funded</div>
 
-  document.getElementById(
-    "totalSaved"
-  ).innerHTML = `
-
-    <div class="balance-label">
-      Total Savings
-    </div>
-
-    <div class="balance-small">
-      ₹${formatMoney(commonSavings)}
-    </div>
-
-    <div class="balance-label">
-      Remaining Balance
-    </div>
-
-    <div class="balance-big">
-      ₹${formatMoney(balance)}
-    </div>
-
-    <div class="used-text">
-      Goal Savings Used:
-      ₹${formatMoney(totalSaved)}
-    </div>
-
+      <div class="goal-actions">
+        <button
+          class="action-btn action-btn--positive"
+          type="button"
+          data-action="increase"
+          data-goal-id="${safeId}"
+          aria-label="Add 100 rupees to ${safeName}"
+        >
+          + ₹100
+        </button>
+        <button
+          class="action-btn action-btn--negative"
+          type="button"
+          data-action="decrease"
+          data-goal-id="${safeId}"
+          aria-label="Subtract 100 rupees from ${safeName}"
+        >
+          - ₹100
+        </button>
+        <button
+          class="action-btn action-btn--danger"
+          type="button"
+          data-action="delete"
+          data-goal-id="${safeId}"
+          aria-label="Delete ${safeName}"
+        >
+          Delete
+        </button>
+      </div>
+    </article>
   `;
 }
 
-displayGoals();
+function render() {
+  const { goalSavingsUsed, goalAmountRemaining, remainingBalance } = computeTotals();
+  const remainingIsNegative = remainingBalance < 0;
 
-if("serviceWorker" in navigator){
+  elements.commonSavingsInput.value = commonSavings > 0 ? String(commonSavings) : "";
+  elements.totalSavingsDisplay.textContent = formatMoney(commonSavings);
+  elements.goalSavingsUsedDisplay.textContent = formatMoney(goalSavingsUsed);
+  elements.goalAmountRemainingDisplay.textContent = formatMoney(goalAmountRemaining);
+  elements.remainingSavingsDisplay.textContent = formatMoney(remainingBalance);
+  elements.remainingBalanceDisplay.textContent = formatMoney(remainingBalance);
+  elements.goalCount.textContent = goals.length === 1 ? "1 goal" : `${goals.length} goals`;
+  elements.emptyState.classList.toggle("is-visible", goals.length === 0);
+  setNegativeState(remainingIsNegative);
 
-  window.addEventListener(
-    "load",
-    ()=>{
+  if (remainingIsNegative) {
+    elements.balanceNote.textContent = `Overallocated by ${formatMoney(Math.abs(remainingBalance))}. Reduce goal savings or increase the common pool.`;
+  } else {
+    elements.balanceNote.textContent = "Common savings minus goal savings used";
+  }
 
-      navigator.serviceWorker
-      .register("sw.js");
+  if (goals.length === 0) {
+    elements.goalList.innerHTML = "";
+    return;
+  }
 
-    }
-  );
-
+  elements.goalList.innerHTML = goals.map(renderGoalCard).join("");
+  renderProgressBars();
 }
+
+function getGoalById(goalId) {
+  return goals.find((goal) => goal.id === goalId);
+}
+
+function allocateSavings(goalId, requestedAmount, sourceInput) {
+  const goal = getGoalById(goalId);
+
+  if (!goal) {
+    return;
+  }
+
+  const amountRequested = normalizeMoney(requestedAmount);
+
+  if (amountRequested < 1) {
+    showToast("Enter an allocation amount.", "error");
+    return;
+  }
+
+  const { remainingBalance } = computeTotals();
+  const maxAllocatable = Math.max(0, Math.min(remainingBalance, getGoalRemaining(goal)));
+
+  if (maxAllocatable <= 0) {
+    showToast("No savings available to allocate.", "error");
+    return;
+  }
+
+  const applied = Math.min(amountRequested, maxAllocatable);
+  goal.saved = clamp(goal.saved + applied, 0, goal.target);
+
+  persistState();
+  render();
+
+  if (sourceInput) {
+    sourceInput.value = "";
+  }
+
+  if (applied < amountRequested) {
+    showToast(`Only ${formatMoney(applied)} was available to allocate.`, "info");
+    return;
+  }
+
+  showToast(`Allocated ${formatMoney(applied)} to ${goal.name}.`, "success");
+}
+
+function reduceSavings(goalId, amount) {
+  const goal = getGoalById(goalId);
+
+  if (!goal) {
+    return;
+  }
+
+  if (goal.saved <= 0) {
+    showToast("No savings to reduce.", "error");
+    return;
+  }
+
+  const applied = Math.min(Math.max(0, normalizeMoney(amount)), goal.saved);
+
+  if (applied < 1) {
+    return;
+  }
+
+  goal.saved = clamp(goal.saved - applied, 0, goal.target);
+  persistState();
+  render();
+  showToast(`Reduced ${formatMoney(applied)} from ${goal.name}.`, "success");
+}
+
+function deleteGoal(goalId) {
+  const index = goals.findIndex((goal) => goal.id === goalId);
+
+  if (index === -1) {
+    return;
+  }
+
+  const goalName = goals[index].name;
+  goals.splice(index, 1);
+  persistState();
+  render();
+  showToast(`Deleted ${goalName}.`, "success");
+}
+
+function addGoal(name, target) {
+  goals.unshift({
+    id: createGoalId(),
+    name,
+    target,
+    saved: 0,
+  });
+}
+
+function handleCommonSavingsSubmit(event) {
+  event.preventDefault();
+
+  commonSavings = normalizeMoney(elements.commonSavingsInput.value);
+  persistState();
+  render();
+  showToast("Common savings updated", "success");
+}
+
+function handleGoalSubmit(event) {
+  event.preventDefault();
+
+  const name = elements.goalNameInput.value.trim();
+  const target = normalizeMoney(elements.goalTargetInput.value);
+
+  if (!name || target < 1) {
+    showToast("Add a goal name and a valid target amount.", "error");
+    return;
+  }
+
+  addGoal(name, target);
+  persistState();
+  render();
+
+  elements.goalNameInput.value = "";
+  elements.goalTargetInput.value = "";
+  elements.goalNameInput.focus();
+
+  showToast("Goal added", "success");
+}
+
+function handleGoalListClick(event) {
+  const button = event.target.closest("button[data-action][data-goal-id]");
+
+  if (!button) {
+    return;
+  }
+
+  const { action, goalId } = button.dataset;
+  const goalCard = button.closest(".goal-card");
+  const allocationInput = goalCard ? goalCard.querySelector("[data-allocate-input]") : null;
+
+  if (action === "allocate") {
+    allocateSavings(goalId, allocationInput ? allocationInput.value : 0, allocationInput);
+    return;
+  }
+
+  if (action === "increase") {
+    allocateSavings(goalId, 100);
+    return;
+  }
+
+  if (action === "decrease") {
+    reduceSavings(goalId, 100);
+    return;
+  }
+
+  if (action === "delete") {
+    deleteGoal(goalId);
+  }
+}
+
+function setupInstallPrompt() {
+  if (!elements.installBtn) {
+    return;
+  }
+
+  window.addEventListener("beforeinstallprompt", (event) => {
+    event.preventDefault();
+    deferredInstallPrompt = event;
+    elements.installBtn.hidden = false;
+  });
+
+  window.addEventListener("appinstalled", () => {
+    deferredInstallPrompt = null;
+    elements.installBtn.hidden = true;
+    showToast("App installed", "success");
+  });
+
+  elements.installBtn.addEventListener("click", async () => {
+    if (!deferredInstallPrompt) {
+      return;
+    }
+
+    deferredInstallPrompt.prompt();
+    const choice = await deferredInstallPrompt.userChoice;
+
+    if (choice.outcome === "accepted") {
+      showToast("Thanks for installing MSR Goals", "success");
+    }
+
+    deferredInstallPrompt = null;
+    elements.installBtn.hidden = true;
+  });
+}
+
+function registerServiceWorker() {
+  if (!("serviceWorker" in navigator) || location.protocol === "file:") {
+    return;
+  }
+
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js", { scope: "./" }).catch(() => {
+      // Silent fallback: the app still works without a cached worker.
+    });
+  });
+}
+
+function initialize() {
+  loadState();
+
+  elements.commonSavingsForm.addEventListener("submit", handleCommonSavingsSubmit);
+  elements.goalForm.addEventListener("submit", handleGoalSubmit);
+  elements.goalList.addEventListener("click", handleGoalListClick);
+
+  setupInstallPrompt();
+  registerServiceWorker();
+  render();
+}
+
+initialize();
