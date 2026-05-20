@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+  <title>MSR Goals</title>
+
+  <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.json">
+</head>
+<body>
+
+  <div class="container">
+
+    <h1>MSR Goals</h1>
+
+    <div class="form">
+      <input type="text" id="goalName" placeholder="Goal Name">
+
+      <input type="number" id="goalAmount" placeholder="Target Amount">
+
+      <button onclick="addGoal()">
+        Add Goal
+      </button>
+    </div>
+
+    <div id="goalList"></div>
+
+  </div>
+
+  <script src="script.js"></script>
+
+</body>
+</html>
