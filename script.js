@@ -1,14 +1,14 @@
 let goals =
-  JSON.parse(
-    localStorage.getItem("goals")
-  ) || [];
+JSON.parse(
+  localStorage.getItem("goals")
+) || [];
 
 let commonSavings =
-  Number(
-    localStorage.getItem(
-      "commonSavings"
-    )
-  ) || 0;
+Number(
+  localStorage.getItem(
+    "commonSavings"
+  )
+) || 0;
 
 function saveGoals(){
 
@@ -16,14 +16,12 @@ function saveGoals(){
     "goals",
     JSON.stringify(goals)
   );
-
 }
 
 function formatMoney(amount){
 
   return Number(amount)
-    .toLocaleString("en-IN");
-
+  .toLocaleString("en-IN");
 }
 
 function getGoalIcon(name){
@@ -50,19 +48,14 @@ function getGoalIcon(name){
 function saveCommonSavings(){
 
   const amount =
-    document.getElementById(
-      "commonSavings"
-    ).value.trim();
+  document.getElementById(
+    "commonSavings"
+  ).value.trim();
 
-  if(amount === ""){
-
-    commonSavings = 0;
-
-  }else{
-
-    commonSavings = Number(amount);
-
-  }
+  commonSavings =
+  amount === ""
+  ? 0
+  : Number(amount);
 
   localStorage.setItem(
     "commonSavings",
@@ -75,14 +68,14 @@ function saveCommonSavings(){
 function addGoal(){
 
   const name =
-    document.getElementById(
-      "goalName"
-    ).value;
+  document.getElementById(
+    "goalName"
+  ).value;
 
   const amount =
-    document.getElementById(
-      "goalAmount"
-    ).value;
+  document.getElementById(
+    "goalAmount"
+  ).value;
 
   if(name === "" || amount === ""){
 
@@ -131,7 +124,7 @@ function updateMoney(index,value){
   ){
 
     goals[index].saved =
-      goals[index].target;
+    goals[index].target;
   }
 
   saveGoals();
@@ -151,9 +144,9 @@ function deleteGoal(index){
 function displayGoals(){
 
   const goalList =
-    document.getElementById(
-      "goalList"
-    );
+  document.getElementById(
+    "goalList"
+  );
 
   goalList.innerHTML = "";
 
@@ -256,54 +249,34 @@ function displayGoals(){
   });
 
   const balance =
-    commonSavings - totalSaved;
+  commonSavings - totalSaved;
 
   document.getElementById(
     "commonSavings"
   ).value =
-    commonSavings || "";
+  commonSavings || "";
 
   document.getElementById(
     "totalSaved"
   ).innerHTML = `
 
-    <div style="
-      font-size:18px;
-      opacity:0.9;
-      margin-bottom:8px;
-    ">
+    <div class="balance-label">
       Total Savings
     </div>
 
-    <div style="
-      font-size:34px;
-      font-weight:bold;
-      margin-bottom:20px;
-    ">
+    <div class="balance-small">
       ₹${formatMoney(commonSavings)}
     </div>
 
-    <div style="
-      font-size:18px;
-      opacity:0.9;
-      margin-bottom:8px;
-    ">
+    <div class="balance-label">
       Remaining Balance
     </div>
 
-    <div style="
-      font-size:58px;
-      font-weight:bold;
-      letter-spacing:1px;
-    ">
+    <div class="balance-big">
       ₹${formatMoney(balance)}
     </div>
 
-    <div style="
-      margin-top:18px;
-      font-size:16px;
-      opacity:0.9;
-    ">
+    <div class="used-text">
       Goal Savings Used:
       ₹${formatMoney(totalSaved)}
     </div>
@@ -320,7 +293,7 @@ if("serviceWorker" in navigator){
     ()=>{
 
       navigator.serviceWorker
-        .register("sw.js");
+      .register("sw.js");
 
     }
   );
