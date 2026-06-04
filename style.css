@@ -224,6 +224,13 @@ img {
     opacity 0.18s ease;
 }
 
+.action-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
 .ghost-btn {
   background: rgba(255, 255, 255, 0.05);
   color: var(--text);
@@ -635,6 +642,14 @@ img {
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 10px;
   align-items: end;
+  position: relative;
+  z-index: 1;
+}
+
+.goal-card__availability {
+  margin: 10px 0 0;
+  color: rgba(245, 247, 247, 0.72);
+  font-size: 0.9rem;
   position: relative;
   z-index: 1;
 }

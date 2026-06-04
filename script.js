@@ -46,7 +46,15 @@ function escapeHtml(value) {
 }
 
 function toInteger(value) {
-  const number = Number(value);
+  if (value == null) {
+    return 0;
+  }
+
+  if (typeof value === "number") {
+    return Number.isFinite(value) ? Math.round(value) : 0;
+  }
+
+  const number = Number(String(value).replace(/[,\s\u20B9]/g, ""));
   return Number.isFinite(number) ? Math.round(number) : 0;
 }
 
@@ -137,9 +145,9 @@ function persistState() {
 }
 
 function formatMoney(amount) {
-  const value = Math.round(Number(amount) || 0);
+  const value = toInteger(amount);
   const formatted = Math.abs(value).toLocaleString("en-IN");
-  return value < 0 ? `-₹${formatted}` : `₹${formatted}`;
+  return value < 0 ? `-\u20B9${formatted}` : `\u20B9${formatted}`;
 }
 
 function getGoalIcon(name) {
@@ -202,9 +210,11 @@ function renderProgressBars() {
   });
 }
 
-function renderGoalCard(goal) {
+function renderGoalCard(goal, remainingBalance) {
   const remaining = getGoalRemaining(goal);
   const percent = goal.target > 0 ? Math.min(100, Math.round((goal.saved / goal.target) * 100)) : 0;
+  const availableToAllocate = Math.max(0, Math.min(remainingBalance, remaining));
+  const canAllocate = availableToAllocate > 0;
   const safeId = escapeHtml(goal.id);
   const safeName = escapeHtml(goal.name);
   const icon = getGoalIcon(goal.name);
@@ -261,10 +271,19 @@ function renderGoalCard(goal) {
           type="button"
           data-action="allocate"
           data-goal-id="${safeId}"
+          ${canAllocate ? "" : 'disabled aria-disabled="true" title="Increase common savings or reduce allocated savings"'}
         >
           Allocate
         </button>
       </div>
+
+      <p class="goal-card__availability ${canAllocate ? "is-positive" : "is-negative"}">
+        ${
+          canAllocate
+            ? `Available to allocate: ${formatMoney(availableToAllocate)}`
+            : "No savings available to allocate"
+        }
+      </p>
 
       <div class="progress" aria-label="${safeName} progress">
         <div
@@ -336,7 +355,7 @@ function render() {
     return;
   }
 
-  elements.goalList.innerHTML = goals.map(renderGoalCard).join("");
+  elements.goalList.innerHTML = goals.map((goal) => renderGoalCard(goal, remainingBalance)).join("");
   renderProgressBars();
 }
 
