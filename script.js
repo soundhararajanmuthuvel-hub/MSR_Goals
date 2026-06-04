@@ -31,6 +31,7 @@ let goals = [];
 let commonSavings = 0;
 let deferredInstallPrompt = null;
 let toastTimer = null;
+const memoryStorage = new Map();
 
 function escapeHtml(value) {
   const entities = {
@@ -55,6 +56,24 @@ function normalizeMoney(value) {
 
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
+}
+
+function safeGetStorageItem(key) {
+  try {
+    const value = localStorage.getItem(key);
+    return value !== null ? value : memoryStorage.get(key) ?? null;
+  } catch {
+    return memoryStorage.get(key) ?? null;
+  }
+}
+
+function safeSetStorageItem(key, value) {
+  try {
+    localStorage.setItem(key, value);
+    memoryStorage.delete(key);
+  } catch {
+    memoryStorage.set(key, value);
+  }
 }
 
 function createGoalId() {
@@ -84,13 +103,13 @@ function normalizeGoal(goal) {
 }
 
 function readStoredValue(primaryKey, fallbackKey) {
-  const primary = localStorage.getItem(primaryKey);
+  const primary = safeGetStorageItem(primaryKey);
 
   if (primary !== null) {
     return primary;
   }
 
-  return localStorage.getItem(fallbackKey);
+  return safeGetStorageItem(fallbackKey);
 }
 
 function loadState() {
@@ -113,8 +132,8 @@ function loadState() {
 }
 
 function persistState() {
-  localStorage.setItem(STORAGE_KEYS.goals, JSON.stringify(goals));
-  localStorage.setItem(STORAGE_KEYS.commonSavings, String(commonSavings));
+  safeSetStorageItem(STORAGE_KEYS.goals, JSON.stringify(goals));
+  safeSetStorageItem(STORAGE_KEYS.commonSavings, String(commonSavings));
 }
 
 function formatMoney(amount) {
